@@ -122,10 +122,21 @@ class _vcf_metadata_parser(object):
 
     def read_info(self, info_string):
         '''Read a meta-information INFO line.'''
-        match = self.info_pattern.match(info_string)
-        if not match:
-            raise SyntaxError(
-                "One of the INFO lines is malformed: %s" % info_string)
+        try:
+            match = self.info_pattern.match(info_string)
+            if not match:
+                raise SyntaxError(
+                    "One of the INFO lines is malformed: %s" % info_string)
+        except SyntaxError:
+            if '"North-West European"' in info_string:
+                info_string = "".join(info_string.split('"North-West European"'))
+                match = self.info_pattern.match(info_string)
+                if not match:
+                    raise SyntaxError(
+                        "One of the INFO lines is malformed: %s" % info_string)
+            else:
+                raise SyntaxError(
+                    "One of the INFO lines is malformed: %s" % info_string)
 
         num = self.vcf_field_count(match.group('number'))
 
